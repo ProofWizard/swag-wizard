@@ -894,25 +894,46 @@ function removeBackground(dataUrl, callback) {
     const imageData = ctx.getImageData(0, 0, W, H);
     const d = imageData.data;
 
-    // ── 1. Sample seed pixels around the entire border ──
-    const seeds = [];
-    for (let x = 0; x < W; x++) { seeds.push([x, 0]); seeds.push([x, H-1]); }
-    for (let y = 1; y < H-1; y++) { seeds.push([0, y]); seeds.push([W-1, y]); }
+    // ── 0. Check if image already has a transparent background ──
+    // If >5% of pixels are already transparent, the logo has no background — use as-is.
+    let existingTransparentCount = 0;
+    for (let i = 3; i < d.length; i += 4) {
+      if (d[i] < 128) existingTransparentCount++;
+    }
+    if (existingTransparentCount / (W * H) > 0.05) {
+      callback(dataUrl, false);
+      return;
+    }
 
-    // Collect border colors, ignoring already-transparent pixels
+    // ── 1. Sample corners for background color (corners are most reliably pure background) ──
+    const cs = Math.max(2, Math.min(8, Math.floor(Math.min(W, H) / 10)));
     let rSum=0, gSum=0, bSum=0, count=0;
-    seeds.forEach(([x,y]) => {
-      const i=(y*W+x)*4;
-      if(d[i+3] < 20) return;
-      rSum+=d[i]; gSum+=d[i+1]; bSum+=d[i+2]; count++;
-    });
+    const sampleRect = (x0,y0,x1,y1) => {
+      for(let y=y0;y<y1;y++) for(let x=x0;x<x1;x++){
+        const i=(y*W+x)*4; if(d[i+3]<20) continue;
+        rSum+=d[i]; gSum+=d[i+1]; bSum+=d[i+2]; count++;
+      }
+    };
+    sampleRect(0,0,cs,cs);            // top-left
+    sampleRect(W-cs,0,W,cs);          // top-right
+    sampleRect(0,H-cs,cs,H);          // bottom-left
+    sampleRect(W-cs,H-cs,W,H);        // bottom-right
+
+    // Fall back to full border if corners are all transparent or logo-covered
+    if(count < 6){
+      for(let x=0;x<W;x++){[0,H-1].forEach(y=>{const i=(y*W+x)*4;if(d[i+3]>=20){rSum+=d[i];gSum+=d[i+1];bSum+=d[i+2];count++;}});}
+      for(let y=1;y<H-1;y++){[0,W-1].forEach(x=>{const i=(y*W+x)*4;if(d[i+3]>=20){rSum+=d[i];gSum+=d[i+1];bSum+=d[i+2];count++;}});}
+    }
     if(count===0){ callback(dataUrl, false); return; }
     const bgR=rSum/count, bgG=gSum/count, bgB=bSum/count;
 
-    // ── 2. Decide if there IS a meaningful background to remove ──
-    // If every border pixel is already transparent, nothing to do.
-    const TOLERANCE = 38;   // primary removal tolerance
-    const FRINGE    = 60;   // wider pass for anti-alias fringe
+    const TOLERANCE = 52;   // higher tolerance catches off-white / shadow variation
+    const FRINGE    = 80;   // wider fringe for better anti-alias cleanup
+
+    // ── 2. Build border seeds ──
+    const seeds = [];
+    for(let x=0;x<W;x++){seeds.push([x,0]);seeds.push([x,H-1]);}
+    for(let y=1;y<H-1;y++){seeds.push([0,y]);seeds.push([W-1,y]);}
 
     // ── 3. Flood fill (iterative BFS) from all border seeds ──
     const visited = new Uint8Array(W * H);
@@ -945,22 +966,21 @@ function removeBackground(dataUrl, callback) {
       if(y<H-1) queue.push(idx+W);
     }
 
-    // ── 4. Fringe pass: soften anti-aliased edges ──
-    // Any pixel adjacent to a transparent pixel that's close to bg color
-    // gets its alpha reduced proportionally.
-    for(let y=1; y<H-1; y++){
-      for(let x=1; x<W-1; x++){
-        const idx=y*W+x, i=idx*4;
-        if(d[i+3]===0) continue;
-        // Check if any neighbor is transparent
-        const hasTransNeighbor =
-          d[(idx-1)*4+3]===0 || d[(idx+1)*4+3]===0 ||
-          d[(idx-W)*4+3]===0 || d[(idx+W)*4+3]===0;
-        if(!hasTransNeighbor) continue;
-        const diff = colorDiff(d[i],d[i+1],d[i+2], bgR,bgG,bgB);
-        if(diff < FRINGE){
-          // Fade proportionally: closer to bg = more transparent
-          d[i+3] = Math.round(d[i+3] * (diff / FRINGE));
+    // ── 4. Fringe pass x2: soften anti-aliased edges ──
+    // Run twice — second pass catches pixels newly adjacent after first pass.
+    for(let pass=0; pass<2; pass++){
+      for(let y=1; y<H-1; y++){
+        for(let x=1; x<W-1; x++){
+          const idx=y*W+x, i=idx*4;
+          if(d[i+3]===0) continue;
+          const hasTransNeighbor =
+            d[(idx-1)*4+3]===0 || d[(idx+1)*4+3]===0 ||
+            d[(idx-W)*4+3]===0 || d[(idx+W)*4+3]===0;
+          if(!hasTransNeighbor) continue;
+          const diff = colorDiff(d[i],d[i+1],d[i+2], bgR,bgG,bgB);
+          if(diff < FRINGE){
+            d[i+3] = Math.round(d[i+3] * (diff / FRINGE));
+          }
         }
       }
     }
@@ -1189,6 +1209,16 @@ function generateMockup() {
   openModal();
   const canvas = document.getElementById('mockupCanvas');
   const ctx    = canvas.getContext('2d');
+
+  // Scale canvas to device pixel ratio so it renders crisp on retina/HiDPI screens
+  const dpr = window.devicePixelRatio || 1;
+  const CSS_W = 460, CSS_H = 560;
+  canvas.width  = CSS_W * dpr;
+  canvas.height = CSS_H * dpr;
+  canvas.style.width  = CSS_W + 'px';
+  canvas.style.height = CSS_H + 'px';
+  ctx.scale(dpr, dpr);
+
   document.getElementById('genText').style.display    = 'block';
   canvas.style.display = 'none';
 
@@ -1206,7 +1236,9 @@ function generateMockup() {
    CANVAS DRAWING
 ════════════════════════════ */
 function drawMockup(canvas, ctx, done) {
-  const W=canvas.width, H=canvas.height;
+  // Use CSS pixel dimensions so all coordinate math works regardless of DPR scaling
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.width / dpr, H = canvas.height / dpr;
   ctx.clearRect(0,0,W,H);
 
   const bg=ctx.createLinearGradient(0,0,W,H);
@@ -1764,6 +1796,8 @@ function overlayLogo(ctx,area,done){
     const x=area.x+(area.w-dw)/2;
     const y=area.y+(area.h-dh)/2;
     ctx.save(); ctx.globalAlpha=0.94;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img,x,y,dw,dh);
     ctx.restore();
     if(done)done();
