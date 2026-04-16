@@ -244,9 +244,33 @@
   .art-notice strong { color:#5A4000; }
 
   /* ══════════════════════════════
+     STEP 3  –  DUAL UPLOAD
+  ══════════════════════════════ */
+  .upload-pair { display:flex; gap:20px; align-items:flex-start; }
+  .upload-slot { flex:1; min-width:0; }
+  .upload-slot-label {
+    font-size:0.75rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.6px; color:var(--muted); margin-bottom:10px;
+  }
+  .upload-slot-label strong { color:var(--navy); }
+  .logo2-clear-btn {
+    font-size:0.75rem; color:var(--muted); background:none; border:none;
+    cursor:pointer; padding:0; margin-left:8px; font-family:inherit;
+  }
+  .logo2-clear-btn:hover { color:#c41e2a; }
+
+  /* ══════════════════════════════
      STEP 4  –  CUSTOMIZE
   ══════════════════════════════ */
-  .placement-grid { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:26px; }
+  .placement-section { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:20px; }
+  .placement-section-label { font-size:0.8rem; font-weight:700; color:var(--navy); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .placement-section-label .logo-pill {
+    background:var(--navy); color:white; font-size:0.68rem; padding:2px 9px;
+    border-radius:20px; font-weight:700; letter-spacing:0.3px;
+  }
+  .placement-divider { border:none; border-top:1px dashed var(--border); margin:24px 0; }
+  .logo2-back-note { font-size:0.8rem; color:var(--muted); margin-top:12px; line-height:1.5; }
+  .placement-grid { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
   .placement-chip {
     padding:9px 18px; border:2px solid var(--border); border-radius:30px;
     font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s;
@@ -545,49 +569,87 @@
   <!-- ══════ STEP 3 — UPLOAD ══════ -->
   <div class="step-panel" id="step3">
     <div class="section-title">Upload your logo or artwork</div>
-    <div class="section-sub">We accept print-ready art files as well as common image formats</div>
+    <div class="section-sub">Upload one logo for a single placement, or two logos for front + back</div>
 
     <div class="art-notice" id="artNotice">
       <span>⚠️</span>
       <span><strong>Art file received.</strong> Your file has been noted. Since this format can't be rendered in the browser, the preview will show a logo placeholder — but your file is ready for the design team. For the best preview, also upload a PNG or JPG version if you have one.</span>
     </div>
 
-    <div class="upload-box" id="uploadBox" onclick="document.getElementById('fileInput').click()">
-      <div class="upload-icon">📁</div>
-      <h3>Click to upload your logo or artwork</h3>
-      <p>For the mockup preview, use a PNG or JPG with a transparent or white background</p>
-      <p style="margin-top:4px;">Print-ready art files are also accepted for your design team</p>
-      <div class="file-types">
-        <span class="ft-chip">PNG</span>
-        <span class="ft-chip">JPG</span>
-        <span class="ft-chip">SVG</span>
-        <span class="ft-chip">PDF</span>
-        <span class="ft-chip">AI</span>
-        <span class="ft-chip">EPS</span>
-        <span class="ft-chip">TIFF</span>
-        <span class="ft-chip">PSD</span>
-      </div>
-      <input type="file" id="fileInput"
-        accept="image/*,.ai,.eps,.pdf,.psd,.tiff,.tif,.svg,.cdr,.indd"
-        onchange="handleFileUpload(event)">
-    </div>
+    <div class="upload-pair">
+      <!-- ── LOGO 1 ── -->
+      <div class="upload-slot">
+        <div class="upload-slot-label"><strong>Logo 1</strong> — Primary</div>
 
-    <div class="file-preview" id="filePreview">
-      <div class="file-thumb" id="fileThumb" style="position:relative;">
-        <img id="logoPreviewImg" src="" alt="" style="display:none">
-        <span class="file-icon" id="fileIcon" style="display:none">🎨</span>
-        <div class="processing-overlay" id="processingOverlay">
-          <div class="mini-spinner"></div>
-          <span>Removing bg…</span>
+        <div class="upload-box" id="uploadBox" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📁</div>
+          <h3>Click to upload logo</h3>
+          <p>PNG or JPG recommended for preview</p>
+          <div class="file-types">
+            <span class="ft-chip">PNG</span><span class="ft-chip">JPG</span>
+            <span class="ft-chip">SVG</span><span class="ft-chip">AI</span>
+            <span class="ft-chip">EPS</span><span class="ft-chip">PDF</span>
+          </div>
+          <input type="file" id="fileInput"
+            accept="image/*,.ai,.eps,.pdf,.psd,.tiff,.tif,.svg,.cdr,.indd"
+            onchange="handleFileUpload(event,1)">
+        </div>
+
+        <div class="file-preview" id="filePreview">
+          <div class="file-thumb" id="fileThumb" style="position:relative;">
+            <img id="logoPreviewImg" src="" alt="" style="display:none">
+            <span class="file-icon" id="fileIcon" style="display:none">🎨</span>
+            <div class="processing-overlay" id="processingOverlay">
+              <div class="mini-spinner"></div><span>Removing bg…</span>
+            </div>
+          </div>
+          <div class="file-meta">
+            <h4 id="fileNameLabel">logo.png</h4>
+            <p id="fileSizeLabel">—</p>
+            <span class="bg-removed-badge" id="bgRemovedBadge">✓ Background removed</span>
+            <p class="art-note" id="artNoteLabel" style="display:none">✓ Art file accepted for design team</p>
+          </div>
+          <button class="change-btn" onclick="changeFile(1)">Change file</button>
         </div>
       </div>
-      <div class="file-meta">
-        <h4 id="fileNameLabel">logo.png</h4>
-        <p id="fileSizeLabel">—</p>
-        <span class="bg-removed-badge" id="bgRemovedBadge">✓ Background removed</span>
-        <p class="art-note" id="artNoteLabel" style="display:none">✓ Art file accepted for design team</p>
+
+      <!-- ── LOGO 2 ── -->
+      <div class="upload-slot">
+        <div class="upload-slot-label">
+          <strong>Logo 2</strong> — Back Print (Optional)
+          <button class="logo2-clear-btn" id="logo2ClearBtn" onclick="clearLogo2()" style="display:none">✕ Remove</button>
+        </div>
+
+        <div class="upload-box" id="uploadBox2" onclick="document.getElementById('fileInput2').click()">
+          <div class="upload-icon">📁</div>
+          <h3>Click to upload logo</h3>
+          <p>Optional — only if you need a back print</p>
+          <div class="file-types">
+            <span class="ft-chip">PNG</span><span class="ft-chip">JPG</span>
+            <span class="ft-chip">SVG</span><span class="ft-chip">AI</span>
+            <span class="ft-chip">EPS</span><span class="ft-chip">PDF</span>
+          </div>
+          <input type="file" id="fileInput2"
+            accept="image/*,.ai,.eps,.pdf,.psd,.tiff,.tif,.svg,.cdr,.indd"
+            onchange="handleFileUpload(event,2)">
+        </div>
+
+        <div class="file-preview" id="filePreview2" style="display:none">
+          <div class="file-thumb" id="fileThumb2" style="position:relative;">
+            <img id="logoPreviewImg2" src="" alt="" style="display:none">
+            <span class="file-icon" id="fileIcon2" style="display:none">🎨</span>
+            <div class="processing-overlay" id="processingOverlay2">
+              <div class="mini-spinner"></div><span>Removing bg…</span>
+            </div>
+          </div>
+          <div class="file-meta">
+            <h4 id="fileNameLabel2">—</h4>
+            <p id="fileSizeLabel2">—</p>
+            <span class="bg-removed-badge" id="bgRemovedBadge2">✓ Background removed</span>
+          </div>
+          <button class="change-btn" onclick="changeFile(2)">Change file</button>
+        </div>
       </div>
-      <button class="change-btn" onclick="changeFile()">Change file</button>
     </div>
 
     <div class="btn-row">
@@ -599,25 +661,42 @@
   <!-- ══════ STEP 4 — CUSTOMIZE ══════ -->
   <div class="step-panel" id="step4">
     <div class="section-title">Customize placement & size</div>
-    <div class="section-sub">Choose where your logo appears on the shirt and how large it is</div>
+    <div class="section-sub" id="step4Sub">Choose where your logo appears on the shirt and how large it is</div>
 
-    <div style="margin-bottom:22px;">
-      <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:12px;">Logo placement</div>
-      <div class="placement-grid">
-        <button class="placement-chip selected" data-placement="full-front"         onclick="selectPlacement(this)">Full Front</button>
-        <button class="placement-chip"           data-placement="full-back"          onclick="selectPlacement(this)">Full Back</button>
-        <button class="placement-chip"           data-placement="wearers-left-chest"  onclick="selectPlacement(this)">Wearer's Left Chest</button>
-        <button class="placement-chip"           data-placement="wearers-right-chest" onclick="selectPlacement(this)">Wearer's Right Chest</button>
+    <!-- LOGO 1 PLACEMENT -->
+    <div class="placement-section">
+      <div class="placement-section-label">
+        <span class="logo-pill">Logo 1</span>
+        Placement
       </div>
-      <div style="margin-top:10px; font-size:0.8rem; color:var(--muted); line-height:1.5;" id="placementDesc">
+      <div class="placement-grid" id="placementGrid1">
+        <button class="placement-chip selected" data-placement="full-front"          onclick="selectPlacement(this,1)">Full Front</button>
+        <button class="placement-chip"           data-placement="full-back"           onclick="selectPlacement(this,1)" id="chip-full-back-1">Full Back</button>
+        <button class="placement-chip"           data-placement="wearers-left-chest"  onclick="selectPlacement(this,1)">Wearer's Left Chest</button>
+        <button class="placement-chip"           data-placement="wearers-right-chest" onclick="selectPlacement(this,1)">Wearer's Right Chest</button>
+      </div>
+      <div style="font-size:0.8rem; color:var(--muted); line-height:1.5;" id="placementDesc">
         Traditional front imprint area — centered on the body of the shirt.
+      </div>
+      <div class="slider-wrap" style="margin-top:16px;margin-bottom:0;">
+        <div class="slider-label">Logo 1 Size <span id="sizeLabel">30%</span></div>
+        <input type="range" id="sizeSlider" min="10" max="90" value="30"
+               oninput="document.getElementById('sizeLabel').textContent=this.value+'%'">
       </div>
     </div>
 
-    <div class="slider-wrap">
-      <div class="slider-label">Logo Size <span id="sizeLabel">30%</span></div>
-      <input type="range" id="sizeSlider" min="10" max="90" value="30"
-             oninput="document.getElementById('sizeLabel').textContent=this.value+'%'">
+    <!-- LOGO 2 PLACEMENT (shown only when logo2 is uploaded) -->
+    <div class="placement-section" id="logo2PlacementSection" style="display:none;">
+      <div class="placement-section-label">
+        <span class="logo-pill" style="background:var(--gold);color:var(--navy);">Logo 2</span>
+        Back Placement
+      </div>
+      <p class="logo2-back-note">Logo 2 will be placed on the <strong>full back</strong> of the garment. Use the slider to adjust its size.</p>
+      <div class="slider-wrap" style="margin-top:14px;margin-bottom:0;">
+        <div class="slider-label">Logo 2 Size <span id="sizeLabel2">30%</span></div>
+        <input type="range" id="sizeSlider2" min="10" max="90" value="30"
+               oninput="document.getElementById('sizeLabel2').textContent=this.value+'%'">
+      </div>
     </div>
 
     <div class="btn-row">
@@ -636,7 +715,8 @@
       <div class="info-card"><h4>Color</h4>
         <p><span class="color-preview" id="sum-color-swatch"></span><span id="sum-color">—</span></p>
       </div>
-      <div class="info-card"><h4>Logo Placement</h4><p id="sum-placement">—</p></div>
+      <div class="info-card"><h4>Logo 1 Placement</h4><p id="sum-placement">—</p></div>
+      <div class="info-card" id="sum-logo2-card" style="display:none"><h4>Logo 2 Placement</h4><p id="sum-placement2">Full Back</p></div>
       <div class="info-card"><h4>File Uploaded</h4><p id="sum-file">—</p></div>
     </div>
 
@@ -748,6 +828,9 @@ const state = {
   color: null, colorLabel: '', colorHex: '',
   logoDataUrl: null, logoFileName: '', isArtFile: false,
   placement: 'full-front', logoSize: 30,
+  // Logo 2 (optional back print)
+  logo2DataUrl: null, logo2FileName: '', logo2IsArtFile: false,
+  logoSize2: 30,
 };
 
 /* ════════════════════════════
@@ -817,59 +900,131 @@ function isImageRenderable(name) {
 const uploadBox = document.getElementById('uploadBox');
 uploadBox.addEventListener('dragover', e => { e.preventDefault(); uploadBox.classList.add('dragover'); });
 uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
-uploadBox.addEventListener('drop', e => { e.preventDefault(); uploadBox.classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f) processFile(f); });
+uploadBox.addEventListener('drop', e => { e.preventDefault(); uploadBox.classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f) processFile(f,1); });
 
-function handleFileUpload(e) { const f = e.target.files[0]; if(f) processFile(f); }
+const uploadBox2 = document.getElementById('uploadBox2');
+uploadBox2.addEventListener('dragover', e => { e.preventDefault(); uploadBox2.classList.add('dragover'); });
+uploadBox2.addEventListener('dragleave', () => uploadBox2.classList.remove('dragover'));
+uploadBox2.addEventListener('drop', e => { e.preventDefault(); uploadBox2.classList.remove('dragover'); const f=e.dataTransfer.files[0]; if(f) processFile(f,2); });
 
-function processFile(file) {
-  state.logoFileName = file.name;
-  const artFile    = isArtFile(file.name);
-  const renderable = isImageRenderable(file.name);
-  state.isArtFile  = artFile;
+function handleFileUpload(e, slot) { const f = e.target.files[0]; if(f) processFile(f, slot||1); }
 
-  document.getElementById('artNotice').classList.toggle('show', artFile);
-  document.getElementById('artNoteLabel').style.display = artFile ? 'block' : 'none';
-  document.getElementById('bgRemovedBadge').classList.remove('show');
+function processFile(file, slot) {
+  slot = slot || 1;
 
-  const prevImg  = document.getElementById('logoPreviewImg');
-  const prevIcon = document.getElementById('fileIcon');
-  const overlay  = document.getElementById('processingOverlay');
+  if (slot === 1) {
+    state.logoFileName = file.name;
+    state.isArtFile = isArtFile(file.name);
+    const artFile    = state.isArtFile;
+    const renderable = isImageRenderable(file.name);
 
-  document.getElementById('fileNameLabel').textContent = file.name;
-  document.getElementById('fileSizeLabel').textContent = (file.size/1024).toFixed(1) + ' KB';
-  document.getElementById('filePreview').classList.add('visible');
-  uploadBox.style.display = 'none';
-  // disable Continue until processing done
-  document.getElementById('step3Next').disabled = true;
+    document.getElementById('artNotice').classList.toggle('show', artFile);
+    document.getElementById('artNoteLabel').style.display = artFile ? 'block' : 'none';
+    document.getElementById('bgRemovedBadge').classList.remove('show');
 
-  if (renderable) {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      // Show thumb with spinner while removing bg
-      prevImg.src = ev.target.result;
-      prevImg.style.display = 'block';
-      prevIcon.style.display = 'none';
-      overlay.classList.add('show');
+    const prevImg  = document.getElementById('logoPreviewImg');
+    const prevIcon = document.getElementById('fileIcon');
+    const overlay  = document.getElementById('processingOverlay');
 
-      // Run background removal asynchronously so UI paints first
-      setTimeout(() => {
-        removeBackground(ev.target.result, (processedDataUrl, bgWasRemoved) => {
-          overlay.classList.remove('show');
-          state.logoDataUrl = processedDataUrl;
-          prevImg.src = processedDataUrl;
-          if (bgWasRemoved) {
-            document.getElementById('bgRemovedBadge').classList.add('show');
-          }
-          document.getElementById('step3Next').disabled = false;
-        });
-      }, 50);
-    };
-    reader.readAsDataURL(file);
+    document.getElementById('fileNameLabel').textContent = file.name;
+    document.getElementById('fileSizeLabel').textContent = (file.size/1024).toFixed(1) + ' KB';
+    document.getElementById('filePreview').classList.add('visible');
+    uploadBox.style.display = 'none';
+    document.getElementById('step3Next').disabled = true;
+
+    if (renderable) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        prevImg.src = ev.target.result;
+        prevImg.style.display = 'block';
+        prevIcon.style.display = 'none';
+        overlay.classList.add('show');
+        setTimeout(() => {
+          removeBackground(ev.target.result, (processedDataUrl, bgWasRemoved) => {
+            overlay.classList.remove('show');
+            state.logoDataUrl = processedDataUrl;
+            prevImg.src = processedDataUrl;
+            if (bgWasRemoved) document.getElementById('bgRemovedBadge').classList.add('show');
+            document.getElementById('step3Next').disabled = false;
+          });
+        }, 50);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      state.logoDataUrl = null;
+      prevImg.style.display = 'none';
+      prevIcon.style.display = 'block';
+      document.getElementById('step3Next').disabled = false;
+    }
+
   } else {
-    state.logoDataUrl = null;
-    prevImg.style.display = 'none';
-    prevIcon.style.display = 'block';
-    document.getElementById('step3Next').disabled = false;
+    // Slot 2
+    state.logo2FileName  = file.name;
+    state.logo2IsArtFile = isArtFile(file.name);
+    const renderable = isImageRenderable(file.name);
+
+    const prevImg2  = document.getElementById('logoPreviewImg2');
+    const prevIcon2 = document.getElementById('fileIcon2');
+    const overlay2  = document.getElementById('processingOverlay2');
+
+    document.getElementById('fileNameLabel2').textContent = file.name;
+    document.getElementById('fileSizeLabel2').textContent = (file.size/1024).toFixed(1) + ' KB';
+    document.getElementById('filePreview2').style.display = 'flex';
+    uploadBox2.style.display = 'none';
+    document.getElementById('logo2ClearBtn').style.display = 'inline';
+
+    if (renderable) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        prevImg2.src = ev.target.result;
+        prevImg2.style.display = 'block';
+        prevIcon2.style.display = 'none';
+        overlay2.classList.add('show');
+        setTimeout(() => {
+          removeBackground(ev.target.result, (processedDataUrl, bgWasRemoved) => {
+            overlay2.classList.remove('show');
+            state.logo2DataUrl = processedDataUrl;
+            prevImg2.src = processedDataUrl;
+            if (bgWasRemoved) document.getElementById('bgRemovedBadge2').classList.add('show');
+            updateDualModeUI();
+          });
+        }, 50);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      state.logo2DataUrl = null;
+      prevImg2.style.display = 'none';
+      prevIcon2.style.display = 'block';
+      updateDualModeUI();
+    }
+  }
+}
+
+function clearLogo2() {
+  state.logo2DataUrl = null; state.logo2FileName = ''; state.logo2IsArtFile = false;
+  document.getElementById('filePreview2').style.display = 'none';
+  uploadBox2.style.display = '';
+  document.getElementById('logo2ClearBtn').style.display = 'none';
+  document.getElementById('logoPreviewImg2').src = '';
+  document.getElementById('fileInput2').value = '';
+  updateDualModeUI();
+}
+
+function updateDualModeUI() {
+  const dual = !!state.logo2DataUrl;
+  document.getElementById('logo2PlacementSection').style.display = dual ? 'block' : 'none';
+  // In dual mode, hide Full Back chip for Logo 1 (back is always used for Logo 2)
+  const fbChip = document.getElementById('chip-full-back-1');
+  if (fbChip) {
+    fbChip.style.display = dual ? 'none' : '';
+    // If full-back was selected for logo1 and we switched to dual, reset to full-front
+    if (dual && state.placement === 'full-back') {
+      state.placement = 'full-front';
+      document.querySelectorAll('#placementGrid1 .placement-chip').forEach(c => {
+        c.classList.toggle('selected', c.dataset.placement === 'full-front');
+      });
+      document.getElementById('placementDesc').textContent = PLACEMENT_DESCS['full-front'];
+    }
   }
 }
 
@@ -975,7 +1130,10 @@ function colorDiff(r,g,b, br,bg,bb){
   return Math.sqrt((r-br)**2 + (g-bg)**2 + (b-bb)**2);
 }
 
-function changeFile() { document.getElementById('fileInput').click(); }
+function changeFile(slot) {
+  if (slot === 2) document.getElementById('fileInput2').click();
+  else document.getElementById('fileInput').click();
+}
 
 /* ════════════════════════════
    PLACEMENT & SIZE
@@ -986,12 +1144,15 @@ const PLACEMENT_DESCS = {
   'wearers-left-chest':   "Small imprint on the wearer's left chest — similar to where a shirt pocket sits.",
   'wearers-right-chest':  "Small imprint on the wearer's right chest — mirror position of the left chest.",
 };
-function selectPlacement(el) {
-  document.querySelectorAll('.placement-chip').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
-  state.placement = el.dataset.placement;
-  const desc = document.getElementById('placementDesc');
-  if(desc) desc.textContent = PLACEMENT_DESCS[state.placement] || '';
+function selectPlacement(el, slot) {
+  slot = slot || 1;
+  if (slot === 1) {
+    document.querySelectorAll('#placementGrid1 .placement-chip').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.placement = el.dataset.placement;
+    const desc = document.getElementById('placementDesc');
+    if(desc) desc.textContent = PLACEMENT_DESCS[state.placement] || '';
+  }
 }
 
 /* ════════════════════════════
@@ -1177,87 +1338,147 @@ function photoLogoArea(dx,dy,dw,dh,placement,product){
    GENERATE MOCKUP
 ════════════════════════════ */
 function generateMockup() {
-  state.logoSize = parseInt(document.getElementById('sizeSlider').value);
+  state.logoSize  = parseInt(document.getElementById('sizeSlider').value);
+  state.logoSize2 = parseInt(document.getElementById('sizeSlider2').value);
+  const dual = !!state.logo2DataUrl;
+
+  const placementLabel = state.placement.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+
   document.getElementById('sum-product').textContent   = state.productLabel;
   document.getElementById('sum-color').textContent     = state.colorLabel || '—';
   document.getElementById('sum-color-swatch').style.background = state.colorHex || 'transparent';
-  document.getElementById('sum-placement').textContent =
-    state.placement.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+  document.getElementById('sum-placement').textContent = placementLabel;
   document.getElementById('sum-file').textContent      = state.logoFileName || '—';
+  // Logo 2 summary
+  const logo2Card = document.getElementById('sum-logo2-card');
+  logo2Card.style.display = dual ? '' : 'none';
+  if (dual) document.getElementById('sum-placement2').textContent = 'Full Back';
 
   openModal();
   const canvas = document.getElementById('mockupCanvas');
   const ctx    = canvas.getContext('2d');
-  document.getElementById('genText').style.display    = 'block';
+
+  // Resize canvas based on mode
+  if (dual) {
+    canvas.width = 960; canvas.height = 560;
+  } else {
+    canvas.width = 460; canvas.height = 560;
+  }
+
+  document.getElementById('genText').style.display = 'block';
   canvas.style.display = 'none';
 
   drawMockup(canvas, ctx, () => {
     document.getElementById('genText').style.display = 'none';
     canvas.style.display = 'block';
     document.getElementById('modalProductBadge').textContent = state.productLabel;
-    document.getElementById('modalSub').textContent =
-      state.productLabel + ' · ' + (state.colorLabel||'') + ' · ' +
-      state.placement.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+    const subLabel = dual
+      ? state.productLabel + ' · ' + (state.colorLabel||'') + ' · ' + placementLabel + ' + Full Back'
+      : state.productLabel + ' · ' + (state.colorLabel||'') + ' · ' + placementLabel;
+    document.getElementById('modalSub').textContent = subLabel;
   });
 }
 
 /* ════════════════════════════
    CANVAS DRAWING
 ════════════════════════════ */
-function drawMockup(canvas, ctx, done) {
-  const W=canvas.width, H=canvas.height;
-  ctx.clearRect(0,0,W,H);
 
+// Draws background gradient + dot pattern on full canvas
+function drawCanvasBg(ctx, W, H) {
+  ctx.clearRect(0,0,W,H);
   const bg=ctx.createLinearGradient(0,0,W,H);
   bg.addColorStop(0,'#F2F5FA'); bg.addColorStop(1,'#E5EAF5');
   ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-
   ctx.fillStyle='rgba(13,43,94,0.04)';
   for(let x=0;x<W;x+=28) for(let y=0;y<H;y+=28){
     ctx.beginPath(); ctx.arc(x,y,1.2,0,Math.PI*2); ctx.fill();
   }
+}
 
-  // T-Shirt / Hoodie / Polo: use real model photos + colour replacement
-  if(!state.product || state.product==='tshirt' || state.product==='hoodie' || state.product==='polo'){
-    const isBack   = state.placement==='full-back';
-    const isHoodie = state.product==='hoodie';
-    const isPolo   = state.product==='polo';
-    const srcB64 = isHoodie ? (isBack ? HOODIE_BACK_B64 : HOODIE_FRONT_B64)
-                 : isPolo   ? (isBack ? POLO_BACK_B64   : POLO_FRONT_B64)
-                 :             (isBack ? SHIRT_BACK_B64  : SHIRT_FRONT_B64);
-    const srcL   = isHoodie ? HOODIE_ASH_L : isPolo ? POLO_GREY_L : GRAVEL_L;
-    const lMax   = isHoodie ? 0.96 : 0.90;
-    const target = state.color || '#A0A0A0';
-    const srcImg = new Image();
-    srcImg.onload = () => {
-      recolorShirtImage(srcImg, target, srcL, lMax).then(rcUrl => {
-        const rcImg = new Image();
-        rcImg.onload = () => {
-          const sc=Math.min(W/rcImg.naturalWidth, H/rcImg.naturalHeight);
-          const dw=Math.round(rcImg.naturalWidth*sc);
-          const dh=Math.round(rcImg.naturalHeight*sc);
-          const dx=Math.round((W-dw)/2);
-          const dy=Math.round((H-dh)/2);
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-          ctx.drawImage(rcImg,dx,dy,dw,dh);
-          const area=photoLogoArea(dx,dy,dw,dh,state.placement,state.product);
-          overlayLogo(ctx,area,done);
-        };
-        rcImg.onerror=()=>{ if(done)done(); };
-        rcImg.src=rcUrl;
+// Draws one garment panel (photo-based) at offsetX, with logo overlay
+function drawPhotoPanel(ctx, offsetX, panelW, panelH, srcB64, placement, logoDataUrl, logoSz, srcL, lMax, cb) {
+  const target = state.color || '#A0A0A0';
+  const srcImg = new Image();
+  srcImg.onload = () => {
+    recolorShirtImage(srcImg, target, srcL, lMax).then(rcUrl => {
+      const rcImg = new Image();
+      rcImg.onload = () => {
+        const sc  = Math.min(panelW/rcImg.naturalWidth, panelH/rcImg.naturalHeight);
+        const dw  = Math.round(rcImg.naturalWidth*sc);
+        const dh  = Math.round(rcImg.naturalHeight*sc);
+        const dx  = offsetX + Math.round((panelW-dw)/2);
+        const dy  = Math.round((panelH-dh)/2);
+        ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+        ctx.drawImage(rcImg,dx,dy,dw,dh);
+        const area = photoLogoArea(dx,dy,dw,dh,placement,state.product);
+        overlayLogoData(ctx,area,logoDataUrl,logoSz,cb);
+      };
+      rcImg.onerror=()=>{ if(cb)cb(); };
+      rcImg.src=rcUrl;
+    });
+  };
+  srcImg.onerror=()=>{ if(cb)cb(); };
+  srcImg.src=srcB64;
+}
+
+function drawMockup(canvas, ctx, done) {
+  const W=canvas.width, H=canvas.height;
+  const dual = W > 460; // dual mode when canvas is wide
+
+  drawCanvasBg(ctx, W, H);
+
+  const isHoodie = state.product==='hoodie';
+  const isPolo   = state.product==='polo';
+  const srcL   = isHoodie ? HOODIE_ASH_L : isPolo ? POLO_GREY_L : GRAVEL_L;
+  const lMax   = isHoodie ? 0.96 : 0.90;
+
+  const frontB64 = isHoodie ? HOODIE_FRONT_B64 : isPolo ? POLO_FRONT_B64 : SHIRT_FRONT_B64;
+  const backB64  = isHoodie ? HOODIE_BACK_B64  : isPolo ? POLO_BACK_B64  : SHIRT_BACK_B64;
+
+  if (dual) {
+    // ── DUAL MODE: left panel = front/chest logo, right panel = full back logo ──
+    const PANEL_W = 460;
+
+    // Panel divider
+    ctx.save();
+    ctx.strokeStyle='rgba(13,43,94,0.12)'; ctx.lineWidth=1; ctx.setLineDash([5,5]);
+    ctx.beginPath(); ctx.moveTo(480,16); ctx.lineTo(480,H-16); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+
+    // Panel labels
+    ctx.font='bold 11px Segoe UI,sans-serif';
+    ctx.fillStyle='rgba(13,43,94,0.38)'; ctx.textAlign='center';
+    ctx.fillText('FRONT', 230, 22);
+    ctx.fillText('BACK',  730, 22);
+
+    // Determine which photo to use for left panel
+    const leftIsBack = state.placement === 'full-back';
+    const leftB64    = leftIsBack ? backB64 : frontB64;
+
+    // Draw left panel (Logo 1)
+    drawPhotoPanel(ctx, 0, PANEL_W, H, leftB64, state.placement,
+      state.logoDataUrl, state.logoSize, srcL, lMax, () => {
+        // Draw right panel (Logo 2 — always full-back)
+        drawPhotoPanel(ctx, 500, PANEL_W, H, backB64, 'full-back',
+          state.logo2DataUrl, state.logoSize2, srcL, lMax, done);
       });
-    };
-    srcImg.onerror=()=>{ if(done)done(); };
-    srcImg.src=srcB64;
     return;
   }
 
-  // Polo / Hoodie: geometric fallback
-  const isBack = state.placement==='full-back';
+  // ── SINGLE MODE ──
+  if (!state.product || state.product==='tshirt' || state.product==='hoodie' || state.product==='polo') {
+    const isBack = state.placement==='full-back';
+    const srcB64 = isBack ? backB64 : frontB64;
+    drawPhotoPanel(ctx, 0, W, H, srcB64, state.placement,
+      state.logoDataUrl, state.logoSize, srcL, lMax, done);
+    return;
+  }
+
+  // Geometric fallback
+  const isBack2 = state.placement==='full-back';
   const fns={
-    polo:   isBack ? drawTShirtBack : drawPolo,
-    hoodie: isBack ? drawHoodieBack : drawHoodie,
+    polo:   isBack2 ? drawTShirtBack : drawPolo,
+    hoodie: isBack2 ? drawHoodieBack : drawHoodie,
   };
   const logoArea=(fns[state.product]||drawTShirt)(ctx,W,H,state.color||'#1F5299');
   overlayLogo(ctx,logoArea,done);
@@ -1739,6 +1960,27 @@ function logoAreaFor(cx, cy, placement) {
 /* ════════════════════════════
    LOGO OVERLAY
 ════════════════════════════ */
+// Generic logo overlay — takes explicit logoDataUrl and logoSize
+function overlayLogoData(ctx, area, logoDataUrl, logoSize, done) {
+  if (!logoDataUrl) { if(done)done(); return; }
+  const img = new Image();
+  img.onload = () => {
+    const scale = logoSize/50;
+    const asp   = img.width/img.height;
+    let dw=area.w*scale, dh=dw/asp;
+    if(dh>area.h*scale){ dh=area.h*scale; dw=dh*asp; }
+    const x=area.x+(area.w-dw)/2;
+    const y=area.y+(area.h-dh)/2;
+    ctx.save(); ctx.globalAlpha=0.94;
+    ctx.drawImage(img,x,y,dw,dh);
+    ctx.restore();
+    if(done)done();
+  };
+  img.onerror=()=>{ if(done)done(); };
+  img.src=logoDataUrl;
+}
+
+// Legacy wrapper (used by geometric fallback path)
 function overlayLogo(ctx,area,done){
   if(!state.logoDataUrl){
     if(state.isArtFile){
@@ -1754,21 +1996,7 @@ function overlayLogo(ctx,area,done){
     }
     if(done)done(); return;
   }
-  const img=new Image();
-  img.onload=()=>{
-    const scale=state.logoSize/50;
-    const asp=img.width/img.height;
-    let dw=area.w*scale, dh=dw/asp;
-    if(dh>area.h*scale){ dh=area.h*scale; dw=dh*asp; }
-    const x=area.x+(area.w-dw)/2;
-    const y=area.y+(area.h-dh)/2;
-    ctx.save(); ctx.globalAlpha=0.94;
-    ctx.drawImage(img,x,y,dw,dh);
-    ctx.restore();
-    if(done)done();
-  };
-  img.onerror=()=>{ if(done)done(); };
-  img.src=state.logoDataUrl;
+  overlayLogoData(ctx, area, state.logoDataUrl, state.logoSize, done);
 }
 
 /* ════════════════════════════
@@ -1799,7 +2027,11 @@ function downloadMockup(){
    START OVER
 ════════════════════════════ */
 function startOver(){
-  Object.assign(state,{product:null,productLabel:'',color:null,colorLabel:'',colorHex:'',logoDataUrl:null,logoFileName:'',isArtFile:false,placement:'full-front',logoSize:50});
+  Object.assign(state,{
+    product:null,productLabel:'',color:null,colorLabel:'',colorHex:'',
+    logoDataUrl:null,logoFileName:'',isArtFile:false,placement:'full-front',logoSize:30,
+    logo2DataUrl:null,logo2FileName:'',logo2IsArtFile:false,logoSize2:30,
+  });
   document.querySelectorAll('.product-card').forEach(c=>c.classList.remove('selected'));
   document.getElementById('step1Next').disabled=true;
   document.getElementById('step2Next').disabled=true;
@@ -1810,11 +2042,19 @@ function startOver(){
   document.getElementById('uploadBox').style.display='';
   document.getElementById('fileInput').value='';
   document.getElementById('artNotice').classList.remove('show');
-  document.querySelectorAll('.placement-chip').forEach((c,i)=>c.classList.toggle('selected',i===0));
+  // Reset logo 2
+  clearLogo2();
+  // Reset placement chips
+  document.querySelectorAll('#placementGrid1 .placement-chip').forEach(c=>c.classList.toggle('selected',c.dataset.placement==='full-front'));
+  const fbChip = document.getElementById('chip-full-back-1');
+  if(fbChip) fbChip.style.display='';
+  document.getElementById('logo2PlacementSection').style.display='none';
   const desc = document.getElementById('placementDesc');
   if(desc) desc.textContent = PLACEMENT_DESCS['full-front']||'';
   document.getElementById('sizeSlider').value=30;
   document.getElementById('sizeLabel').textContent='30%';
+  document.getElementById('sizeSlider2').value=30;
+  document.getElementById('sizeLabel2').textContent='30%';
   goToStep(1);
 }
 </script>
