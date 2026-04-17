@@ -1479,7 +1479,7 @@ function drawMockup(canvas, ctx, done) {
   const isPolo   = state.product==='polo';
   const isQzip   = state.product==='qzip';
   const srcL   = isHoodie ? HOODIE_ASH_L : isPolo ? POLO_GREY_L : isQzip ? QZ_ASH_L : GRAVEL_L;
-  const lMax   = isHoodie ? 0.96 : isQzip ? 0.92 : 0.90;
+  const lMax   = isHoodie ? 0.96 : isQzip ? 0.96 : 0.90;
 
   const frontB64 = isHoodie ? HOODIE_FRONT_B64 : isPolo ? POLO_FRONT_B64 : isQzip ? QZ_FRONT_B64 : SHIRT_FRONT_B64;
   const backB64  = isHoodie ? HOODIE_BACK_B64  : isPolo ? POLO_BACK_B64  : isQzip ? QZ_BACK_B64  : SHIRT_BACK_B64;
