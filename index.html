@@ -918,17 +918,27 @@ function applyPreset(name, silent){
   // garment area on the canvas
   let gx = r.x, gy = r.y, gw = r.w, gh = r.h;
   if(gb){
-    gx = r.x + gb.x0 * r.w;
-    gw = (gb.x1 - gb.x0) * r.w;
-    gy = r.y + gb.y0 * r.h;
-    gh = (gb.y1 - gb.y0) * r.h;
+    if(gb.mode === 'subject' && !isCap()){
+      // "subject" detection (whole model — the fallback for dark garments the
+      // colour match can't isolate) returns an unreliable box top, which used
+      // to drop the chest print down toward the waist on those shirts.
+      // Studio photos are framed consistently, so anchor to a standardized
+      // centered-garment region instead and reuse the garment fractions below.
+      gx = r.x + 0.29 * r.w;  gw = 0.42 * r.w;
+      gy = r.y + 0.30 * r.h;  gh = 0.62 * r.h;
+    } else {
+      gx = r.x + gb.x0 * r.w;
+      gw = (gb.x1 - gb.x0) * r.w;
+      gy = r.y + gb.y0 * r.h;
+      gh = (gb.y1 - gb.y0) * r.h;
+    }
   }
 
-  // fractions differ if the box is the garment itself vs. the whole model
-  // (subject box starts at the head, so the chest sits lower)
-  const f = (gb && gb.mode === 'subject')
-    ? { chestY:0.42, frontY:0.50, chestW:0.16, frontW:0.30, backY:0.32, fullBackY:0.50, backW:0.26, fullBackW:0.34 }
-    : { chestY:0.19, frontY:0.28, chestW:0.17, frontW:0.36, backY:0.14, fullBackY:0.34, backW:0.30, fullBackW:0.42 };
+  // placement fractions within the garment area.
+  // backW kept small so the Back Yoke print is tag-sized (a little bigger
+  // than a neck label) rather than a large between-the-shoulder-blades print.
+  const f = { chestY:0.19, frontY:0.28, chestW:0.17, frontW:0.36,
+              backY:0.14, fullBackY:0.34, backW:0.14, fullBackW:0.42 };
 
   // wearer's left chest = viewer's right
   const presets = {
