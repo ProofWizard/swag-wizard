@@ -1182,5 +1182,144 @@ function downloadMockup(){
 /* ═══════════ INIT ═══════════ */
 loadCatalog();
 </script>
+
+<!-- ═══════════ FEEDBACK (emails via Formspree) ═══════════ -->
+<style>
+  #fbBtn{ position:fixed; right:18px; bottom:18px; z-index:900; border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--navy), var(--navy-lt)); color:#fff;
+    font:700 0.85rem 'Segoe UI',sans-serif; padding:11px 16px; border-radius:99px;
+    box-shadow:0 6px 20px rgba(13,43,94,0.3); }
+  #fbBtn:hover{ filter:brightness(1.08); }
+  #fbOverlay{ position:fixed; inset:0; background:rgba(13,43,94,0.45); z-index:1000;
+    display:none; align-items:center; justify-content:center; padding:16px; }
+  #fbOverlay.open{ display:flex; }
+  .fb-modal{ background:var(--card); border-radius:16px; width:100%; max-width:430px;
+    padding:22px 22px 20px; box-shadow:0 24px 70px rgba(0,0,0,0.28); position:relative; }
+  .fb-modal h3{ color:var(--navy); font-size:1.15rem; margin-bottom:2px; }
+  .fb-modal .fb-sub{ color:var(--muted); font-size:0.82rem; margin-bottom:14px; }
+  .fb-x{ position:absolute; top:14px; right:16px; background:none; border:none; font-size:1.3rem;
+    color:var(--muted); cursor:pointer; line-height:1; }
+  .fb-stars{ display:flex; gap:6px; margin-bottom:4px; }
+  .fb-star{ font-size:30px; cursor:pointer; color:var(--border); transition:color .1s; user-select:none; }
+  .fb-star.on{ color:var(--gold); }
+  .fb-hint{ font-size:0.74rem; color:var(--muted); margin-bottom:12px; }
+  .fb-modal textarea{ width:100%; border:1.5px solid var(--border); border-radius:10px;
+    padding:10px 12px; font:0.88rem 'Segoe UI',sans-serif; resize:vertical; min-height:84px; }
+  .fb-modal input[type=email]{ width:100%; border:1.5px solid var(--border); border-radius:10px;
+    padding:10px 12px; font:0.88rem 'Segoe UI',sans-serif; margin-top:10px; }
+  .fb-modal textarea:focus, .fb-modal input:focus{ outline:none; border-color:var(--gold); }
+  #fbSend{ width:100%; margin-top:14px; border:none; cursor:pointer; border-radius:10px; padding:12px;
+    font:700 0.92rem 'Segoe UI',sans-serif; color:#fff;
+    background:linear-gradient(135deg, var(--gold), var(--gold-lt)); }
+  #fbSend:disabled{ opacity:0.55; cursor:default; }
+  #fbErr{ color:var(--red); font-size:0.78rem; margin-top:10px; display:none; }
+  #fbThanks{ text-align:center; padding:18px 4px; display:none; }
+  #fbThanks .fb-emoji{ font-size:2.2rem; }
+  #fbThanks h3{ margin:8px 0 4px; }
+</style>
+
+<button id="fbBtn" onclick="fbOpen()">💬 Feedback</button>
+<div id="fbOverlay" onclick="if(event.target===this)fbClose()">
+  <div class="fb-modal">
+    <button class="fb-x" onclick="fbClose()" aria-label="Close">✕</button>
+    <div id="fbForm">
+      <h3>Share your feedback</h3>
+      <div class="fb-sub">Help us improve the mockup tool</div>
+      <div class="fb-stars" id="fbStars">
+        <span class="fb-star" data-v="1">★</span><span class="fb-star" data-v="2">★</span>
+        <span class="fb-star" data-v="3">★</span><span class="fb-star" data-v="4">★</span>
+        <span class="fb-star" data-v="5">★</span>
+      </div>
+      <div class="fb-hint" id="fbHint">Tap a star to rate</div>
+      <textarea id="fbMsg" placeholder="What worked? What didn't? Anything we should fix?"></textarea>
+      <input id="fbEmail" type="email" placeholder="Your email (optional — so we can follow up)">
+      <button id="fbSend" onclick="fbSubmit()">Send Feedback</button>
+      <div id="fbErr"></div>
+    </div>
+    <div id="fbThanks">
+      <div class="fb-emoji">🎉</div>
+      <h3>Thank you!</h3>
+      <div class="fb-sub">We appreciate you helping us improve.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── Formspree setup ───────────────────────────────────────────────
+   1. Create a free form at https://formspree.io (recipient: brooke@consolidus.com)
+   2. Copy the form's endpoint id and paste it below, replacing REPLACE_WITH_YOUR_FORM_ID
+      e.g.  const FORMSPREE_ENDPOINT = "https://formspree.io/f/xayzbwqd";
+   Jay is CC'd automatically via the _cc field below.                  */
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqeojdyy";
+const FEEDBACK_CC = "jay.asefi@consolidus.com";
+
+let fbRating = 0;
+const fbHints = ['Tap a star to rate','Poor','Fair','Good','Great','Excellent'];
+
+document.querySelectorAll('#fbStars .fb-star').forEach(s => {
+  s.addEventListener('click', () => {
+    fbRating = Number(s.dataset.v);
+    document.querySelectorAll('#fbStars .fb-star').forEach(o =>
+      o.classList.toggle('on', Number(o.dataset.v) <= fbRating));
+    document.getElementById('fbHint').textContent = fbHints[fbRating];
+  });
+});
+
+function fbOpen(){ document.getElementById('fbOverlay').classList.add('open'); }
+function fbClose(){ document.getElementById('fbOverlay').classList.remove('open'); }
+
+function fbContext(){
+  try{
+    var p = (typeof state!=='undefined' && state.product) ? (state.product.style_number+' '+state.product.name) : '—';
+    var c = (typeof state!=='undefined' && state.color) ? state.color.name : '—';
+    var step = (typeof currentStep!=='undefined') ? currentStep : '—';
+    return { product:p, color:c, step:String(step) };
+  }catch(e){ return { product:'—', color:'—', step:'—' }; }
+}
+
+async function fbSubmit(){
+  const msg = document.getElementById('fbMsg').value.trim();
+  const err = document.getElementById('fbErr');
+  if(!fbRating && !msg){ err.textContent='Please add a rating or a comment.'; err.style.display='block'; return; }
+  err.style.display='none';
+  const btn = document.getElementById('fbSend');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  if(FORMSPREE_ENDPOINT.indexOf('REPLACE_WITH_YOUR_FORM_ID') !== -1){
+    err.textContent = 'Feedback form not configured yet (missing Formspree ID).';
+    err.style.display='block'; btn.disabled=false; btn.textContent='Send Feedback'; return;
+  }
+
+  const ctx = fbContext();
+  const fd = new FormData();
+  fd.append('rating', fbRating ? fbRating + ' / 5' : 'not rated');
+  fd.append('message', msg || '(no comment)');
+  fd.append('submitter_email', document.getElementById('fbEmail').value.trim() || '(not provided)');
+  fd.append('on_step', ctx.step);
+  fd.append('product', ctx.product);
+  fd.append('color', ctx.color);
+  fd.append('page', location.href);
+  fd.append('_subject', 'Mockup Tool feedback' + (fbRating ? ' (' + fbRating + '★)' : ''));
+  fd.append('_cc', FEEDBACK_CC);
+  const replyto = document.getElementById('fbEmail').value.trim();
+  if(replyto) fd.append('_replyto', replyto);
+
+  try{
+    const res = await fetch(FORMSPREE_ENDPOINT, { method:'POST', body:fd, headers:{ 'Accept':'application/json' } });
+    if(res.ok){
+      document.getElementById('fbForm').style.display='none';
+      document.getElementById('fbThanks').style.display='block';
+      setTimeout(fbClose, 2200);
+    } else {
+      const data = await res.json().catch(()=>({}));
+      err.textContent = (data.errors && data.errors[0] && data.errors[0].message) || 'Could not send — please try again.';
+      err.style.display='block'; btn.disabled=false; btn.textContent='Send Feedback';
+    }
+  }catch(e){
+    err.textContent = 'Network error — please try again.';
+    err.style.display='block'; btn.disabled=false; btn.textContent='Send Feedback';
+  }
+}
+</script>
 </body>
 </html>
